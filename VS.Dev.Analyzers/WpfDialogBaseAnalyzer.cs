@@ -15,9 +15,9 @@ namespace VS.Dev.Analyzers
     /// Correct: partial class X : Microsoft.VisualStudio.PlatformUI.DialogWindow
     /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    public partial class WpfDialogBaseAnalyzerAnalyzer : DiagnosticAnalyzer
+    public partial class WpfDialogBaseAnalyzer : DiagnosticAnalyzer
     {
-        public const string DiagnosticId = "WpfDialogBaseAnalyzer";
+        public const string DiagnosticId = "WpfDialogBase";
         private static readonly string[] _suggestedBaseClass = new[] { "Microsoft.VisualStudio.PlatformUI.DialogWindow" };
         private static readonly string[] _unexpectedBaseClass = new[] { "System.Windows.Window" };
 
@@ -67,10 +67,15 @@ namespace VS.Dev.Analyzers
                 return;
             }
 
+            var windowParentSymbol = namedTypeSymbol.FindParent(_unexpectedBaseClass);
+            if (windowParentSymbol == null)
+            {
+                return;
+            }
+
             // if is based on Window and PlatformWindow return
             var dialogWindowParentSymbol = namedTypeSymbol.FindParent(_suggestedBaseClass);
-            var windowParentSymbol = namedTypeSymbol.FindParent(_unexpectedBaseClass);
-            if (dialogWindowParentSymbol != null && windowParentSymbol != null)
+            if (dialogWindowParentSymbol != null)
             {
                 return;
             }
